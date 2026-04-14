@@ -1,0 +1,8 @@
+# Build directories
+dist/
+
+# Environment files
+.env
+
+# Go dependency checksums
+go.sum
