@@ -16,15 +16,8 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
+	r.GET("/ping", pingPong)
 	r.GET("/users", getUsers)
-
-	r.GET("/db-uri", getDBURI)
 
 	r.Run()
 }
@@ -33,11 +26,14 @@ type User struct {
 	Name string `json:"name" bson:"name"`
 }
 
+func pingPong(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
+}
+
 func getUsers(c *gin.Context) {
-	client, _ := db.Connect()
-	// println(client)
-	coll := client.Database("my-wallet").Collection("users")
-	// println(coll)
+	coll := db.GetCollection("users")
 
 	filter := bson.D{{}}
 
@@ -50,11 +46,4 @@ func getUsers(c *gin.Context) {
 	cursor.All(c, &users)
 
 	c.JSON(http.StatusOK, users)
-}
-
-func getDBURI(c *gin.Context) {
-	uri := db.GetURI()
-	c.JSON(http.StatusOK, gin.H{
-		"uri": uri,
-	})
 }
