@@ -2,6 +2,7 @@ package main
 
 import (
 	"my-wallet-backend-2/src/db"
+	"my-wallet-backend-2/src/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,10 +23,6 @@ func main() {
 	r.Run()
 }
 
-type User struct {
-	Name string `json:"name" bson:"name"`
-}
-
 func pingPong(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
@@ -37,7 +34,7 @@ func getUsers(c *gin.Context) {
 
 	filter := bson.D{{}}
 
-	var users []User
+	var users []models.User
 	cursor, err := coll.Find(c, filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
