@@ -1,6 +1,7 @@
 package main
 
 import (
+	"my-wallet-backend-2/src/controllers"
 	"my-wallet-backend-2/src/db"
 	"my-wallet-backend-2/src/models"
 	"net/http"
@@ -19,6 +20,9 @@ func main() {
 
 	r.GET("/ping", pingPong)
 	r.GET("/users", getUsers)
+	r.POST("/sign-up", controllers.SignUp)
+	r.POST("/login", controllers.Login)
+	r.POST("/logout", controllers.Logout)
 
 	r.Run()
 }
