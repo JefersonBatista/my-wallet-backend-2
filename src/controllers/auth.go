@@ -5,7 +5,6 @@ import (
 	"my-wallet-backend-2/src/db"
 	"my-wallet-backend-2/src/models"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -65,26 +64,9 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	token := strings.TrimPrefix(authHeader, "Bearer ")
+	token := c.GetString("token")
 
-	if token == "" {
-		c.JSON(http.StatusUnauthorized, "Você não está autorizado!")
-		return
-	}
-
-	var session models.Session
 	sessionColl := db.GetCollection("sessions")
-	err := sessionColl.FindOne(c, bson.D{{Key: "token", Value: token}}).Decode(&session)
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "Você não está autorizado!")
-		return
-	}
-
-	var user models.User
-	userColl := db.GetCollection("users")
-	userColl.FindOne(c, bson.D{{Key: "_id", Value: session.UserID}}).Decode(&user)
 	sessionColl.DeleteOne(c, bson.D{{Key: "token", Value: token}})
-	c.JSON(http.StatusOK, fmt.Sprintf("Sessão do usuário %s encerrada.", user.Name))
+	c.JSON(http.StatusOK, "Sessão encerrada.")
 }

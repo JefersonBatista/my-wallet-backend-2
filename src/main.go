@@ -2,6 +2,7 @@ package main
 
 import (
 	"my-wallet-backend-2/src/controllers"
+	"my-wallet-backend-2/src/middlewares"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -16,7 +17,7 @@ func main() {
 
 	r.POST("/sign-up", controllers.SignUp)
 	r.POST("/login", controllers.Login)
-	r.POST("/logout", controllers.Logout)
+	r.POST("/logout", middlewares.Auth, controllers.Logout)
 
 	r.Run()
 }
