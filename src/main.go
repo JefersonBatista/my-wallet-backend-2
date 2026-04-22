@@ -1,8 +1,7 @@
 package main
 
 import (
-	"my-wallet-backend-2/src/controllers"
-	"my-wallet-backend-2/src/middlewares"
+	"my-wallet-backend-2/src/routers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -13,11 +12,9 @@ func main() {
 		panic(err)
 	}
 
-	r := gin.Default()
+	engine := gin.Default()
+	routers.UseAuthRouter(engine)
+	routers.UseTransactionRouter(engine)
 
-	r.POST("/sign-up", controllers.SignUp)
-	r.POST("/login", controllers.Login)
-	r.POST("/logout", middlewares.Auth, controllers.Logout)
-
-	r.Run()
+	engine.Run()
 }

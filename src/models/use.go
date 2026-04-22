@@ -17,8 +17,14 @@ type User struct {
 
 type Transaction struct {
 	ID          bson.ObjectID `bson:"_id,omitempty"`
+	UserID      bson.ObjectID `bson:"userId,omitempty"`
 	Type        string        `bson:"type"`
 	Value       float64       `bson:"value"`
 	Description string        `bson:"description"`
 	Timestamp   uint          `bson:"timestamp"`
+}
+
+type TransactionList struct {
+	User string        `json:"user"`
+	List []Transaction `json:"list"`
 }
