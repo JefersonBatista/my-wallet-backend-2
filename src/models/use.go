@@ -16,12 +16,12 @@ type User struct {
 }
 
 type Transaction struct {
-	ID          bson.ObjectID `bson:"_id,omitempty"`
-	UserID      bson.ObjectID `bson:"userId,omitempty"`
-	Type        string        `bson:"type"`
-	Value       float64       `bson:"value"`
-	Description string        `bson:"description"`
-	Timestamp   uint          `bson:"timestamp"`
+	ID          bson.ObjectID `bson:"_id,omitempty" json:"_id"`
+	UserID      bson.ObjectID `bson:"userId,omitempty" json:"userId"`
+	Type        string        `bson:"type" json:"type"`
+	Value       float64       `bson:"value" json:"value"`
+	Description string        `bson:"description" json:"description"`
+	Timestamp   uint          `bson:"timestamp" json:"timestamp"`
 }
 
 type TransactionList struct {
