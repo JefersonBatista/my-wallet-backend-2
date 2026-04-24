@@ -14,7 +14,10 @@ import (
 
 func SignUp(c *gin.Context) {
 	var newUser models.NewUser
-	c.ShouldBindJSON(&newUser)
+	if err := c.ShouldBindJSON(&newUser); err != nil {
+		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados do usuário.")
+		return
+	}
 
 	userColl := db.GetCollection("users")
 	findSameEmail := userColl.FindOne(c, bson.D{{Key: "email", Value: newUser.Email}})
@@ -23,20 +26,29 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(newUser.Password), 10)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 10)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível criar o usuário.")
+		return
+	}
 
 	var user models.User
 	user.Name = newUser.Name
 	user.Email = newUser.Email
 	user.PasswordHash = string(passwordHash)
-	userColl.InsertOne(c, user)
+	if _, err := userColl.InsertOne(c, user); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível criar o usuário.")
+	}
 
 	c.JSON(http.StatusCreated, fmt.Sprintf("Usuário %s cadastrado.", user.Name))
 }
 
 func Login(c *gin.Context) {
 	var login models.Login
-	c.ShouldBindJSON(&login)
+	if err := c.ShouldBindJSON(&login); err != nil {
+		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados de login.")
+		return
+	}
 
 	userColl := db.GetCollection("users")
 	var user models.User
@@ -55,10 +67,13 @@ func Login(c *gin.Context) {
 
 	token := uuid.NewString()
 	sessionColl := db.GetCollection("sessions")
-	sessionColl.InsertOne(c, models.Session{
+	if _, err := sessionColl.InsertOne(c, models.Session{
 		UserID: user.ID,
 		Token:  token,
-	})
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível criar a sessão.")
+		return
+	}
 
 	c.JSON(http.StatusOK, token)
 }
@@ -67,6 +82,9 @@ func Logout(c *gin.Context) {
 	token := c.GetString("token")
 
 	sessionColl := db.GetCollection("sessions")
-	sessionColl.DeleteOne(c, bson.D{{Key: "token", Value: token}})
+	if _, err := sessionColl.DeleteOne(c, bson.D{{Key: "token", Value: token}}); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível encerrar a sessão.")
+		return
+	}
 	c.JSON(http.StatusOK, "Sessão encerrada.")
 }

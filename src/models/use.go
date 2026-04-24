@@ -10,9 +10,9 @@ type Session struct {
 
 type User struct {
 	ID           bson.ObjectID `bson:"_id,omitempty"`
-	Name         string        `json:"name" bson:"name"`
-	Email        string        `json:"email" bson:"email"`
-	PasswordHash string        `json:"passwordHash" bson:"passwordHash"`
+	Name         string        `bson:"name"`
+	Email        string        `bson:"email"`
+	PasswordHash string        `bson:"passwordHash"`
 }
 
 type Transaction struct {

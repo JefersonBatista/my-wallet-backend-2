@@ -21,8 +21,16 @@ func GetTransactions(c *gin.Context) {
 	transactionList.User = user.Name
 
 	transactionColl := db.GetCollection("transactions")
-	cursor, _ := transactionColl.Find(c, bson.D{{Key: "userId", Value: userId}})
-	cursor.All(c, &transactionList.List)
+	cursor, err := transactionColl.Find(c, bson.D{{Key: "userId", Value: userId}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível obter as transações do usuário.")
+		return
+	}
+	err = cursor.All(c, &transactionList.List)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível obter as transações do usuário.")
+		return
+	}
 
 	if transactionList.List == nil {
 		transactionList.List = []models.Transaction{}
@@ -33,12 +41,16 @@ func GetTransactions(c *gin.Context) {
 
 func GetTransactionById(c *gin.Context) {
 	id := c.Param("id")
-	objectId, _ := bson.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "ID de transação inválido.")
+		return
+	}
 	userId, _ := c.Get("userId")
 
 	var transaction models.Transaction
 	transactionColl := db.GetCollection("transactions")
-	err := transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
+	err = transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, "Transação não encontrada.")
@@ -55,7 +67,10 @@ func GetTransactionById(c *gin.Context) {
 
 func RegisterTransaction(c *gin.Context) {
 	var newTransaction models.NewTransaction
-	c.ShouldBindJSON(&newTransaction)
+	if err := c.ShouldBindJSON(&newTransaction); err != nil {
+		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados da transação.")
+		return
+	}
 	userId, _ := c.Get("userId")
 
 	transaction := models.Transaction{
@@ -67,19 +82,26 @@ func RegisterTransaction(c *gin.Context) {
 	}
 
 	transactionColl := db.GetCollection("transactions")
-	transactionColl.InsertOne(c, transaction)
+	if _, err := transactionColl.InsertOne(c, transaction); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível registrar a transação.")
+		return
+	}
 
 	c.JSON(http.StatusCreated, "Transação registrada.")
 }
 
 func DeleteTransaction(c *gin.Context) {
 	id := c.Param("id")
-	objectId, _ := bson.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "ID de transação inválido.")
+		return
+	}
 	userId, _ := c.Get("userId")
 
 	var transaction models.Transaction
 	transactionColl := db.GetCollection("transactions")
-	err := transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
+	err = transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, "Transação não encontrada.")
@@ -91,18 +113,25 @@ func DeleteTransaction(c *gin.Context) {
 		return
 	}
 
-	transactionColl.DeleteOne(c, bson.D{{Key: "_id", Value: objectId}})
+	if _, err := transactionColl.DeleteOne(c, bson.D{{Key: "_id", Value: objectId}}); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível deletar a transação.")
+		return
+	}
 	c.JSON(http.StatusOK, "Transação deletada.")
 }
 
 func UpdateTransaction(c *gin.Context) {
 	id := c.Param("id")
-	objectId, _ := bson.ObjectIDFromHex(id)
+	objectId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "ID de transação inválido.")
+		return
+	}
 	userId, _ := c.Get("userId")
 
 	var transaction models.Transaction
 	transactionColl := db.GetCollection("transactions")
-	err := transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
+	err = transactionColl.FindOne(c, bson.D{{Key: "_id", Value: objectId}}).Decode(&transaction)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, "Transação não encontrada.")
@@ -115,9 +144,16 @@ func UpdateTransaction(c *gin.Context) {
 	}
 
 	var updatedTransaction models.NewTransaction
-	c.ShouldBindJSON(&updatedTransaction)
+	err = c.ShouldBindJSON(&updatedTransaction)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "Não foi possível ler os novos dados da transação.")
+		return
+	}
 
-	transactionColl.UpdateOne(c, bson.D{{Key: "_id", Value: objectId}}, bson.D{{Key: "$set", Value: updatedTransaction}})
+	if _, err := transactionColl.UpdateOne(c, bson.D{{Key: "_id", Value: objectId}}, bson.D{{Key: "$set", Value: updatedTransaction}}); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível atualizar a transação.")
+		return
+	}
 	c.JSON(http.StatusOK, "Transação atualizada.")
 }
 
@@ -125,7 +161,10 @@ func DeleteAllTransactions(c *gin.Context) {
 	userId, _ := c.Get("userId")
 
 	transactionColl := db.GetCollection("transactions")
-	transactionColl.DeleteMany(c, bson.D{{Key: "userId", Value: userId}})
+	if _, err := transactionColl.DeleteMany(c, bson.D{{Key: "userId", Value: userId}}); err != nil {
+		c.JSON(http.StatusInternalServerError, "Não foi possível deletar as transações do usuário.")
+		return
+	}
 
 	c.JSON(http.StatusOK, "Todas as transações do usuário foram deletadas.")
 }
