@@ -1,6 +1,7 @@
 package main
 
 import (
+	"my-wallet-backend-2/src/db"
 	"my-wallet-backend-2/src/routers"
 	"my-wallet-backend-2/src/security"
 
@@ -12,6 +13,8 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		panic(err)
 	}
+
+	db.Connect()
 
 	engine := gin.Default()
 	security.SetCors(engine)
