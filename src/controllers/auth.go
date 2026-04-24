@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -16,6 +17,11 @@ func SignUp(c *gin.Context) {
 	var newUser models.NewUser
 	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados do usuário.")
+		return
+	}
+
+	if err := validator.New().Struct(newUser); err != nil {
+		c.JSON(http.StatusBadRequest, "Dados do usuário inválidos.")
 		return
 	}
 
@@ -47,6 +53,11 @@ func Login(c *gin.Context) {
 	var login models.Login
 	if err := c.ShouldBindJSON(&login); err != nil {
 		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados de login.")
+		return
+	}
+
+	if err := validator.New().Struct(login); err != nil {
+		c.JSON(http.StatusBadRequest, "Dados de login inválidos.")
 		return
 	}
 

@@ -6,9 +6,9 @@ type Login struct {
 }
 
 type NewTransaction struct {
-	Type        string  `json:"type" validate:"required,oneof=incoming outgoing"`
-	Value       float64 `json:"value" validate:"required,gt=0"`
-	Description string  `json:"description" validate:"required"`
+	Type        string  `json:"type" validate:"required,oneof=incoming outgoing" bson:"type"`
+	Value       float64 `json:"value" validate:"required,gt=0" bson:"value"`
+	Description string  `json:"description" validate:"required" bson:"description"`
 }
 
 type NewUser struct {

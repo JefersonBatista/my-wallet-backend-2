@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -71,6 +72,12 @@ func RegisterTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "Não foi possível ler os dados da transação.")
 		return
 	}
+
+	if err := validator.New().Struct(newTransaction); err != nil {
+		c.JSON(http.StatusBadRequest, "Dados de transação inválidos.")
+		return
+	}
+
 	userId, _ := c.Get("userId")
 
 	transaction := models.Transaction{
@@ -144,9 +151,13 @@ func UpdateTransaction(c *gin.Context) {
 	}
 
 	var updatedTransaction models.NewTransaction
-	err = c.ShouldBindJSON(&updatedTransaction)
-	if err != nil {
+	if err = c.ShouldBindJSON(&updatedTransaction); err != nil {
 		c.JSON(http.StatusBadRequest, "Não foi possível ler os novos dados da transação.")
+		return
+	}
+
+	if err := validator.New().Struct(updatedTransaction); err != nil {
+		c.JSON(http.StatusBadRequest, "Dados de transação inválidos.")
 		return
 	}
 
