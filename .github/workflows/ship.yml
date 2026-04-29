@@ -1,0 +1,29 @@
+name: Ship docker image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ship:
+    runs-on: ubuntu-latest
+    environment: my-wallet
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          build-args: MONGO_URI=${{ secrets.MONGO_URI }}
+          push: true
+          tags: ${{ vars.DOCKER_USERNAME }}/my-wallet-backend:latest
