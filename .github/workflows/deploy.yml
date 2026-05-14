@@ -21,6 +21,7 @@ jobs:
         with:
           project_id: ${{ vars.PROJECT_ID }}
           workload_identity_provider: projects/${{ vars.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/my-wallet
+          service_account: "github-actions@${{ vars.PROJECT_ID }}.iam.gserviceaccount.com"
 
       - name: Configure Docker for Google Cloud
         run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
