@@ -1,0 +1,48 @@
+name: Deploy on Cloud Run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: my-wallet
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Log in to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.PROJECT_ID }}
+          workload_identity_provider: projects/${{ vars.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/my-wallet
+
+      - name: Configure Docker for Google Cloud
+        run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
+
+      - name: Build Docker image
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          build-args: MONGO_URI=${{ secrets.MONGO_URI }}
+          push: true
+          tags: southamerica-east1-docker.pkg.dev/${{ vars.PROJECT_ID }}/my-wallet/my-wallet-backend:latest
+
+      - id: deploy
+        name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: my-wallet
+          image: southamerica-east1-docker.pkg.dev/${{ vars.PROJECT_ID }}/my-wallet/my-wallet-backend:latest
+          region: southamerica-east1
+
+      - name: Show service URL
+        run: echo ${{ steps.deploy.outputs.url }}
