@@ -44,6 +44,10 @@ jobs:
           service: my-wallet
           image: southamerica-east1-docker.pkg.dev/${{ vars.PROJECT_ID }}/my-wallet/my-wallet-backend:latest
           region: southamerica-east1
+          flags: >
+            --ingress=all
+            --allow-unauthenticated
+            --no-invoker-iam-check
 
       - name: Show service URL
         run: echo ${{ steps.deploy.outputs.url }}
