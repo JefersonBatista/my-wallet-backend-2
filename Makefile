@@ -7,3 +7,7 @@ build:
 
 run:
 	./dist/main
+
+test:
+	go test \
+		./src/controllers/transaction.go ./src/controllers/transaction_test.go

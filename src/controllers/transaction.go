@@ -4,15 +4,46 @@ import (
 	"my-wallet-backend-2/src/db"
 	"my-wallet-backend-2/src/models"
 	"net/http"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"golang.org/x/text/unicode/norm"
 )
+
+func filterTransactionsByDescription(transactions []models.Transaction, filter string) []models.Transaction {
+	normalizeText := func(text string) string {
+		var normalized strings.Builder
+
+		for _, r := range norm.NFD.String(text) {
+			if !unicode.Is(unicode.Mn, r) && unicode.IsLetter(r) {
+				normalized.WriteRune(unicode.ToLower(r))
+			}
+		}
+
+		return normalized.String()
+	}
+
+	normFilter := normalizeText(filter)
+
+	var filtered []models.Transaction
+	for _, transaction := range transactions {
+		normDescription := normalizeText(transaction.Description)
+
+		if strings.Contains(string(normDescription), string(normFilter)) {
+			filtered = append(filtered, transaction)
+		}
+	}
+
+	return filtered
+}
 
 func GetTransactions(c *gin.Context) {
 	userId, _ := c.Get("userId")
+	descriptionFilter := c.Query("description")
 
 	var user models.User
 	userColl := db.GetCollection("users")
@@ -35,6 +66,10 @@ func GetTransactions(c *gin.Context) {
 
 	if transactionList.List == nil {
 		transactionList.List = []models.Transaction{}
+	}
+
+	if descriptionFilter != "" {
+		transactionList.List = filterTransactionsByDescription(transactionList.List, descriptionFilter)
 	}
 
 	c.JSON(http.StatusOK, transactionList)

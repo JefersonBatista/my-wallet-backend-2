@@ -14,7 +14,7 @@ This app includes:
 
 ## Next Steps
 
-- Currently, this project has no next steps
+- Filter transactions by description or date
 
 ## Technologies
 
