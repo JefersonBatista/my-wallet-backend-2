@@ -29,7 +29,7 @@ func filterTransactionsByDescription(transactions []*models.Transaction, filter 
 
 	normFilter := normalizeText(filter)
 
-	var filtered []*models.Transaction
+	filtered := []*models.Transaction{}
 	for _, transaction := range transactions {
 		normDescription := normalizeText(transaction.Description)
 
