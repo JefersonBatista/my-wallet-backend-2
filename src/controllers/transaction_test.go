@@ -6,7 +6,7 @@ import (
 )
 
 func TestFilterTransactionsByDescription(t *testing.T) {
-	tranasctions := []models.Transaction{
+	transactions := []*models.Transaction{
 		{Description: "Preciso de palavras com acento pra testar direito"},
 		{Description: "Não me venha com essa"},
 		{Description: "Maiúsculas e minúsculas não devem importar"},
@@ -15,12 +15,12 @@ func TestFilterTransactionsByDescription(t *testing.T) {
 
 	filter := "NAOM"
 
-	expected := []models.Transaction{
+	expected := []*models.Transaction{
 		{Description: "Não me venha com essa"},
 		{Description: "Com essas descrições, não me resta problemas no teste"},
 	}
 
-	result := filterTransactionsByDescription(tranasctions, filter)
+	result := filterTransactionsByDescription(transactions, filter)
 
 	if len(result) != len(expected) {
 		t.Errorf("Expected %d transactions, but got %d", len(expected), len(result))

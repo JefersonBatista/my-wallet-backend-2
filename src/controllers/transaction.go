@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func filterTransactionsByDescription(transactions []models.Transaction, filter string) []models.Transaction {
+func filterTransactionsByDescription(transactions []*models.Transaction, filter string) []*models.Transaction {
 	normalizeText := func(text string) string {
 		var normalized strings.Builder
 
@@ -29,7 +29,7 @@ func filterTransactionsByDescription(transactions []models.Transaction, filter s
 
 	normFilter := normalizeText(filter)
 
-	var filtered []models.Transaction
+	var filtered []*models.Transaction
 	for _, transaction := range transactions {
 		normDescription := normalizeText(transaction.Description)
 
@@ -65,7 +65,7 @@ func GetTransactions(c *gin.Context) {
 	}
 
 	if transactionList.List == nil {
-		transactionList.List = []models.Transaction{}
+		transactionList.List = []*models.Transaction{}
 	}
 
 	if descriptionFilter != "" {

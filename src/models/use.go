@@ -25,6 +25,6 @@ type Transaction struct {
 }
 
 type TransactionList struct {
-	User string        `json:"user"`
-	List []Transaction `json:"list"`
+	User string         `json:"user"`
+	List []*Transaction `json:"list"`
 }
