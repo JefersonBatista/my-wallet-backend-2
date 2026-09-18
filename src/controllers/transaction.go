@@ -11,14 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"golang.org/x/text/unicode/norm"
 )
 
 func filterTransactionsByDescription(transactions []*models.Transaction, filter string) []*models.Transaction {
 	normalizeText := func(text string) string {
 		var normalized strings.Builder
 
-		for _, r := range norm.NFD.String(text) {
+		// for _, r := range norm.NFD.String(text) {
+		for _, r := range text {
 			if !unicode.Is(unicode.Mn, r) && unicode.IsLetter(r) {
 				normalized.WriteRune(unicode.ToLower(r))
 			}
