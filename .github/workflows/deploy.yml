@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +21,11 @@ jobs:
       - name: Run tests
         run: make test
 
+      - name: Run lint
+        run: make lint
+
   deploy:
-    needs: test
+    needs: quality
     runs-on: ubuntu-latest
     environment: my-wallet
 

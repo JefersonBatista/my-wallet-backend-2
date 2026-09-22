@@ -11,3 +11,6 @@ run:
 test:
 	go test \
 		./src/controllers/transaction.go ./src/controllers/transaction_test.go
+
+lint:
+	go vet ./src
