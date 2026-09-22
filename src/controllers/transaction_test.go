@@ -31,4 +31,16 @@ func TestFilterTransactionsByDescription(t *testing.T) {
 			t.Errorf("Expected transaction description '%s', but got '%s'", expected[i].Description, transaction.Description)
 		}
 	}
+
+	filterToEmpty := "sim"
+	resultToEmpty := filterTransactionsByDescription(transactions, filterToEmpty)
+
+	if resultToEmpty == nil {
+		t.Error("Expected empty transaction list, but got nil")
+		return
+	}
+
+	if len(resultToEmpty) != 0 {
+		t.Errorf("Expected 0 transactions, but got %d", len(resultToEmpty))
+	}
 }
