@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"my-wallet-backend-2/src/db"
 	"my-wallet-backend-2/src/models"
 	"net/http"
@@ -41,9 +42,23 @@ func filterTransactionsByDescription(transactions []*models.Transaction, filter 
 	return filtered
 }
 
+func filterTransactionsByDate(transactions []*models.Transaction, start, end int) []*models.Transaction {
+	filtered := []*models.Transaction{}
+
+	for _, transaction := range transactions {
+		if (start < 0 || transaction.Timestamp >= uint(start)) && (end < 0 || transaction.Timestamp <= uint(end)) {
+			filtered = append(filtered, transaction)
+		}
+	}
+
+	return filtered
+}
+
 func GetTransactions(c *gin.Context) {
 	userId, _ := c.Get("userId")
 	descriptionFilter := c.Query("description")
+	startStr := c.Query("after")
+	endStr := c.Query("before")
 
 	var user models.User
 	userColl := db.GetCollection("users")
@@ -71,6 +86,29 @@ func GetTransactions(c *gin.Context) {
 	if descriptionFilter != "" {
 		transactionList.List = filterTransactionsByDescription(transactionList.List, descriptionFilter)
 	}
+
+	var start, end int
+	if startStr != "" {
+		_, err := fmt.Sscanf(startStr, "%d", &start)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "Parâmetro 'after' inválido.")
+			return
+		}
+	} else {
+		start = -1
+	}
+
+	if endStr != "" {
+		_, err := fmt.Sscanf(endStr, "%d", &end)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "Parâmetro 'before' inválido.")
+			return
+		}
+	} else {
+		end = -1
+	}
+
+	transactionList.List = filterTransactionsByDate(transactionList.List, start, end)
 
 	c.JSON(http.StatusOK, transactionList)
 }
