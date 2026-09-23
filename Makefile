@@ -1,5 +1,5 @@
 format:
-	gofmt -w src
+	gofmt -w ./src
 
 build:
 	go mod tidy && \
@@ -9,8 +9,7 @@ run:
 	./dist/main
 
 test:
-	go test \
-		./src/controllers/transaction.go ./src/controllers/transaction_test.go
+	go test ./src/...
 
-lint:
-	go vet ./src
+static-check:
+	go vet ./src/...
